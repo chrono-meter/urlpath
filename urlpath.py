@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """Object-oriented URL from `urllib.parse` and `pathlib`
 """
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __author__ = __author_email__ = 'chrono-meter@gmx.net'
 __license__ = 'PSF'
 __url__ = 'https://github.com/chrono-meter/urlpath'
 __download_url__ = 'http://pypi.python.org/pypi/urlpath'
 # http://pypi.python.org/pypi?%3Aaction=list_classifiers
-__classifiers__ = (
+__classifiers__ = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Web Environment',
     'Intended Audience :: Developers',
@@ -18,7 +18,7 @@ __classifiers__ = (
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Topic :: System :: Filesystems',
-)
+]
 __all__ = ('URL', )
 
 import collections
@@ -26,7 +26,10 @@ import functools
 from pathlib import _PosixFlavour, PurePath
 import urllib.parse
 import re
-from unittest.mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 try:
     import webob
 except ImportError:
@@ -187,8 +190,9 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             return a.url
 
     def _init(self):
-        # trick to escape '/' in query and fragment and trailing
-        self._parts[-1] = self._parts[-1].replace('\\x00', '/')
+        if self._parts:
+            # trick to escape '/' in query and fragment and trailing
+            self._parts[-1] = self._parts[-1].replace('\\x00', '/')
 
     def _make_child(self, args):
         # replace by parts that have no query and have no fragment
