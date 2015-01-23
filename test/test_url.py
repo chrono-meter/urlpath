@@ -116,6 +116,11 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(url.name, 'sep')
         self.assertEqual(url.parts[-1], 'sep')
 
+        self.assertEqual(URL('htp://example.com/').trailing_sep, '')
+        self.assertEqual(URL('htp://example.com/with/sep/').trailing_sep, '/')
+        self.assertEqual(URL('htp://example.com/without/sep').trailing_sep, '')
+        self.assertEqual(URL('htp://example.com/with/double-sep//').trailing_sep, '//')
+
     def test_webob(self):
         base_url = 'http://www.example.com'
         url = URL(webob.Request.blank('/webob/request', base_url=base_url))

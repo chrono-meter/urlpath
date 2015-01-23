@@ -155,6 +155,8 @@ Trailing separator will be remained::
     >>> url = URL('http://www.example.com/path/with/trailing/sep/')
     >>> str(url).endswith('/')
     True
+    >>> url.trailing_sep
+    '/'
     >>> url.name
     'sep'
     >>> url.path
@@ -165,6 +167,8 @@ Trailing separator will be remained::
     >>> url = URL('http://www.example.com/path/with/trailing/sep')
     >>> str(url).endswith('/')
     False
+    >>> url.trailing_sep
+    ''
     >>> url.name
     'sep'
     >>> url.path

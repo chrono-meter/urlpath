@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Object-oriented URL from `urllib.parse` and `pathlib`
 """
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __author__ = __author_email__ = 'chrono-meter@gmx.net'
 __license__ = 'PSF'
 __url__ = 'https://github.com/chrono-meter/urlpath'
@@ -262,7 +262,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @functools.lru_cache()
     def trailing_sep(self):
         """The trailing separator of url."""
-        return re.match('($s*)$' % (re.escape(self._flavour.sep), ), urllib.parse.urlsplit(super().name).path).group(0)
+        return re.search('(' + re.escape(self._flavour.sep) + '*)$', urllib.parse.urlsplit(super().name).path).group(0)
 
     @property
     @functools.lru_cache()
