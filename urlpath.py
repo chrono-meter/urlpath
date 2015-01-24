@@ -200,7 +200,6 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             return super()._make_child(args)
 
     def __bytes__(self):
-        # TODO: idna?
         return str(self).encode('utf-8')
 
     @functools.lru_cache()
@@ -281,26 +280,51 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         """Return a new url with components changed."""
         if scheme is missing:
             scheme = self.scheme
+        elif not isinstance(scheme, str):
+            scheme = str(scheme)
 
         if username is not missing or password is not missing or hostname is not missing or port is not missing:
             assert netloc is missing
+
             if username is missing:
                 username = self.username
+            elif not isinstance(username, str):
+                username = str(username)
+
             if password is missing:
                 password = self.password
+            elif not isinstance(password, str):
+                password = str(password)
+
             if hostname is missing:
                 hostname = self.hostname
+            elif not isinstance(hostname, str):
+                hostname = str(hostname)
+
             if port is missing:
                 port = self.port
+
             netloc = netlocjoin(username, password, hostname, port)
+
         elif netloc is missing:
             netloc = self.netloc
 
+        elif not isinstance(netloc, str):
+            netloc = str(netloc)
+
         if name is not missing:
             assert path is missing
+
+            if not isinstance(name, str):
+                name = str(name)
+
             path = urllib.parse.urljoin(self.path.rstrip(self._flavour.sep), name)
+
         elif path is missing:
             path = self.path
+
+        elif not isinstance(path, str):
+            path = str(path)
 
         if query is missing:
             query = self.query
@@ -310,9 +334,13 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             pass
         elif isinstance(query, collections.Sequence):
             query = urllib.parse.urlencode(query, **self._urlencode_args)
+        else:
+            query = str(query)
 
         if fragment is missing:
             fragment = self.fragment
+        elif not isinstance(fragment, str):
+            fragment = str(fragment)
 
         return self.__class__(urllib.parse.urlunsplit((scheme, netloc, path, query, fragment)))
 
@@ -342,7 +370,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return self.with_components(fragment=fragment)
 
     def resolve(self):
-        """Normalize the path.
+        """Resolve relative path of the path.
         """
         path = []
 
