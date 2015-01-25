@@ -17,7 +17,6 @@ __classifiers__ = [
     'Programming Language :: Python :: 3.4',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Software Development :: Libraries :: Python Modules',
-    'Topic :: System :: Filesystems',
 ]
 __all__ = ('URL', )
 
@@ -149,7 +148,6 @@ class _URLFlavour(_PosixFlavour):
 
     def make_uri(self, url):
         return str(url)
-        # return urllib.parse.urlunsplit((url.scheme, url.netloc, url.path, url.query, url.fragment))
 
 
 class URL(urllib.parse._NetlocResultMixinStr, PurePath):
@@ -205,23 +203,17 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @functools.lru_cache()
     def as_uri(self):
         """Return URI."""
-        return self._flavour.make_uri(self)
-
-    @property
-    @functools.lru_cache()
-    def name(self):
-        """The final path component, if any."""
-        return urllib.parse.urlsplit(super().name).path.rstrip(self._flavour.sep)
+        return str(self)
 
     @property
     @functools.lru_cache()
     def parts(self):
         """An object providing sequence-like access to the
         components in the filesystem path."""
-        parts = self._parts
-        if len(parts) == (1 if (self._drv or self._root) else 0):
-            return super().parts
-        return tuple(self._parts[:-1] + [self.name])
+        if self._drv or self._root:
+            return tuple([self._parts[0]] + [urllib.parse.unquote(i) for i in self._parts[1:-1]] + [self.name])
+        else:
+            return tuple([urllib.parse.unquote(i) for i in self._parts[:-1]] + [self.name])
 
     @property
     @functools.lru_cache()
@@ -241,9 +233,48 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
     @property
     @functools.lru_cache()
+    def username(self):
+        """The username of url."""
+        # NOTE: username and password can be encoded by percent-encoding.
+        #       http://%75%73%65%72:%70%61%73%73%77%64@httpbin.org/basic-auth/user/passwd
+        result = super().username
+        if result is not None:
+            result = urllib.parse.unquote(result)
+        return result
+
+    @property
+    @functools.lru_cache()
+    def password(self):
+        """The password of url."""
+        result = super().password
+        if result is not None:
+            result = urllib.parse.unquote(result)
+        return result
+
+    @property
+    @functools.lru_cache()
+    def hostname(self):
+        """The hostname of url."""
+        result = super().hostname
+        if result is not None:
+            try:
+                result = result.encode('ascii').decode('idna')
+            except UnicodeEncodeError:
+                pass
+        return result
+
+    @property
+    @functools.lru_cache()
     def path(self):
         """The path of url."""
-        return urllib.parse.urlsplit(str(self)).path
+        begin = 1 if self._drv or self._root else 0
+        return self._root + self._flavour.sep.join(self._parts[begin:-1] + [urllib.parse.urlsplit(super().name).path])
+
+    @property
+    @functools.lru_cache()
+    def name(self):
+        """The final path component, if any."""
+        return urllib.parse.unquote(urllib.parse.urlsplit(super().name).path.rstrip(self._flavour.sep))
 
     @property
     @functools.lru_cache()
@@ -275,12 +306,20 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         """The query parsed by `urllib.parse.parse_qs` of url."""
         return FrozenMultiDict(urllib.parse.parse_qs(self.query, **self._parse_qsl_args))
 
+    def with_name(self, name):
+        """Return a new url with the file name changed."""
+        return super().with_name(urllib.parse.quote(name, safe=''))
+
+    def with_suffix(self, suffix):
+        """Return a new url with the file suffix changed (or added, if none)."""
+        return super().with_suffix(urllib.parse.quote(suffix, safe='.'))
+
     def with_components(self, *, scheme=missing, netloc=missing, username=missing, password=missing, hostname=missing,
                         port=missing, path=missing, name=missing, query=missing, fragment=missing):
         """Return a new url with components changed."""
         if scheme is missing:
             scheme = self.scheme
-        elif not isinstance(scheme, str):
+        elif scheme is not None and not isinstance(scheme, str):
             scheme = str(scheme)
 
         if username is not missing or password is not missing or hostname is not missing or port is not missing:
@@ -288,18 +327,24 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
             if username is missing:
                 username = self.username
-            elif not isinstance(username, str):
+            elif username is not None and not isinstance(username, str):
                 username = str(username)
+            if username is not None:
+                username = urllib.parse.quote(username, safe='')
 
             if password is missing:
                 password = self.password
-            elif not isinstance(password, str):
+            elif password is not None and not isinstance(password, str):
                 password = str(password)
+            if password is not None:
+                password = urllib.parse.quote(password, safe='')
 
             if hostname is missing:
                 hostname = self.hostname
-            elif not isinstance(hostname, str):
+            elif hostname is not None and not isinstance(hostname, str):
                 hostname = str(hostname)
+            if hostname is not None:
+                hostname = hostname.encode('idna').decode('ascii')
 
             if port is missing:
                 port = self.port
@@ -309,7 +354,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         elif netloc is missing:
             netloc = self.netloc
 
-        elif not isinstance(netloc, str):
+        elif netloc is not None and not isinstance(netloc, str):
             netloc = str(netloc)
 
         if name is not missing:
@@ -318,12 +363,12 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             if not isinstance(name, str):
                 name = str(name)
 
-            path = urllib.parse.urljoin(self.path.rstrip(self._flavour.sep), name)
+            path = urllib.parse.urljoin(self.path.rstrip(self._flavour.sep), urllib.parse.quote(name, safe=''))
 
         elif path is missing:
             path = self.path
 
-        elif not isinstance(path, str):
+        elif path is not None and not isinstance(path, str):
             path = str(path)
 
         if query is missing:
@@ -334,12 +379,12 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             pass
         elif isinstance(query, collections.Sequence):
             query = urllib.parse.urlencode(query, **self._urlencode_args)
-        else:
+        elif query is not None:
             query = str(query)
 
         if fragment is missing:
             fragment = self.fragment
-        elif not isinstance(fragment, str):
+        elif fragment is not None and not isinstance(fragment, str):
             fragment = str(fragment)
 
         return self.__class__(urllib.parse.urlunsplit((scheme, netloc, path, query, fragment)))

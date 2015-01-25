@@ -59,6 +59,7 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(str(url.with_netloc('localhost')), 'http://localhost/path/to/file.exe?query?fragment')
         self.assertEqual(str(url.with_userinfo('username', 'password')),
                          'http://username:password@www.example.com/path/to/file.exe?query?fragment')
+        self.assertEqual(str(url.with_userinfo(None, None)), 'http://www.example.com/path/to/file.exe?query?fragment')
         self.assertEqual(str(url.with_hostinfo('localhost', 8080)),
                          'http://localhost:8080/path/to/file.exe?query?fragment')
 
@@ -162,3 +163,40 @@ class UrlTest(unittest.TestCase):
         url = URL('')
 
         self.assertEqual(str(url), '.')
+
+    def test_encoding(self):
+        self.assertEqual(URL('http://www.xn--alliancefranaise-npb.nu/').hostname, 'www.alliancefrançaise.nu')
+        self.assertEqual(str(URL('http://localhost/').with_hostinfo('www.alliancefrançaise.nu')),
+                         'http://www.xn--alliancefranaise-npb.nu/')
+
+        url = URL('http://%75%73%65%72:%70%61%73%73%77%64@httpbin.org/basic-auth/user/passwd')
+        self.assertEqual(url.username, 'user')
+        self.assertEqual(url.password, 'passwd')
+
+        username = 'foo@example.com'
+        password = 'pa$$word'
+        url = URL('http://example.com').with_userinfo(username, password)
+        self.assertEqual(url.username, username)
+        self.assertEqual(url.password, password)
+        self.assertEqual(str(url), 'http://foo%40example.com:pa%24%24word@example.com')
+
+        # URL keeps initial string.
+        original = 'http://example.com/日本語の/パス'
+        url = URL(original)
+        self.assertEqual(str(url), original)
+
+        original = 'http://example.com/めちゃくちゃな/パス/%2F%23%3F'
+        url = URL(original)
+        self.assertEqual(str(url), original)
+        self.assertEqual(url.path, '/めちゃくちゃな/パス/%2F%23%3F')
+        self.assertEqual(url.name, '/#?')
+        self.assertTupleEqual(url.parts, ('http://example.com/', 'めちゃくちゃな', 'パス', '/#?'))
+
+        self.assertEqual(str(URL('http://example.com/name').with_name('日本語/名前')),
+                         'http://example.com/%E6%97%A5%E6%9C%AC%E8%AA%9E%2F%E5%90%8D%E5%89%8D')
+
+        # TODO: OMG
+        self.assertEqual(str(URL('http://example.com/name') / '日本語/名前'),
+                         'http://example.com/name/日本語/名前')
+
+        self.assertEqual(str(URL('http://example.com/file').with_suffix('.///')), 'http://example.com/file.%2F%2F%2F')
