@@ -157,24 +157,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
     @classmethod
     def _parse_args(cls, args):
-        # This is useful when you don't want to create an instance, just
-        # canonicalize some constructor arguments.
-        parts = []
-        for a in args:
-            if isinstance(a, PurePath):
-                parts += a._parts
-            elif isinstance(a, str):
-                # Force-cast str subclasses to str (issue #21127)
-                parts.append(str(a))
-            else:
-                canonicalized = cls._canonicalize_arg(a)
-                if canonicalized is None:
-                    raise TypeError(
-                        "argument should be a path or str object, not %r"
-                        % type(a))
-                else:
-                    parts.append(canonicalized)
-        return cls._flavour.parse_parts(parts)
+        return super()._parse_args((cls._canonicalize_arg(a) for a in args))
 
     @classmethod
     def _canonicalize_arg(cls, a):
@@ -186,6 +169,8 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
         if webob and isinstance(a, webob.Request):
             return a.url
+
+        return a
 
     def _init(self):
         if self._parts:
