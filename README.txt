@@ -86,7 +86,7 @@ Access query::
     >>> url.form_fields
     (('field1', '1'), ('field2', '2'), ('field1', '3'))
     >>> url.form
-    <FrozenMultiDict {'field1': ['1', '3'], 'field2': ['2']}>
+    <FrozenMultiDict {'field1': ('1', '3'), 'field2': ('2',)}>
     >>> url.form.get_one('field1')
     '1'
     >>> url.form.get_one('field3') is None

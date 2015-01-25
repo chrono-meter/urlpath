@@ -289,7 +289,8 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @functools.lru_cache()
     def form(self):
         """The query parsed by `urllib.parse.parse_qs` of url."""
-        return FrozenMultiDict(urllib.parse.parse_qs(self.query, **self._parse_qsl_args))
+        return FrozenMultiDict({k: tuple(v)
+                                for k, v in urllib.parse.parse_qs(self.query, **self._parse_qsl_args).items()})
 
     def with_name(self, name):
         """Return a new url with the file name changed."""

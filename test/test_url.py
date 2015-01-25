@@ -74,8 +74,8 @@ class UrlTest(unittest.TestCase):
 
         self.assertEqual(url.query, query)
         self.assertSetEqual(set(url.form), {'field1', 'field2'})
-        self.assertEqual(url.form.get('field1'), ['value1', 'value2'])
-        self.assertEqual(url.form.get('field2'), ['hello, world&python'])
+        self.assertTupleEqual(url.form.get('field1'), ('value1', 'value2'))
+        self.assertTupleEqual(url.form.get('field2'), ('hello, world&python', ))
         self.assertIn('field1', url.form)
         self.assertIn('field2', url.form)
         self.assertNotIn('field3', url.form)
@@ -87,8 +87,8 @@ class UrlTest(unittest.TestCase):
         self.assertNotIn('field2', url.form)
         self.assertIn('field3', url.form)
         self.assertIn('field4', url.form)
-        self.assertEqual(url.form.get('field3'), ['value3'])
-        self.assertEqual(url.form.get('field4'), ['1', '2', '3'])
+        self.assertTupleEqual(url.form.get('field3'), ('value3', ))
+        self.assertTupleEqual(url.form.get('field4'), ('1', '2', '3'))
 
     def test_query_field_order(self):
         url = URL('http://example.com/').with_query(field1='field1', field2='field2', field3='field3')
