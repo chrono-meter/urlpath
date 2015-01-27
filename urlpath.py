@@ -92,6 +92,22 @@ class FrozenMultiDict(MultiDictMixin, FrozenDict):
     pass
 
 
+def cached_property(getter):
+    """Limited version of `functools.lru_cache`. But `__hash__` is not required.
+    """
+    @functools.wraps(getter)
+    def helper(self):
+        key = '_cached_property_' + getter.__name__
+
+        if key in self.__dict__:
+            return self.__dict__[key]
+
+        result = self.__dict__[key] = getter(self)
+        return result
+
+    return helper
+
+
 def netlocjoin(username, password, hostname, port):
     """Helper function for building netloc string.
 
@@ -182,20 +198,22 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         with patch.object(self, '_parts', list(self.parts)):
             return super()._make_child(args)
 
+    @cached_property
     def __str__(self):
         # NOTE: PurePath.__str__ returns '.' if path is empty.
         return urllib.parse.urlunsplit(self.components)
 
+    @cached_property
     def __bytes__(self):
         return str(self).encode('utf-8')
 
-    @functools.lru_cache()
+    @cached_property
     def as_uri(self):
         """Return URI."""
         return str(self)
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def parts(self):
         """An object providing sequence-like access to the
         components in the filesystem path."""
@@ -205,35 +223,43 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             return tuple([urllib.parse.unquote(i) for i in self._parts[:-1]] + [self.name])
 
     @property
-    @functools.lru_cache()
+    @cached_property
+    def components(self):
+        """URL components, `(scheme, netloc, path, query, fragment)`."""
+        return self.scheme, self.netloc, self.path, self.query, self.fragment
+
+    _cparts = components
+
+    @property
+    @cached_property
     def scheme(self):
         """The scheme of url."""
         return urllib.parse.urlsplit(self._drv).scheme
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def netloc(self):
         """The scheme of url."""
         return netlocjoin(self.username, self.password, self.hostname, self.port)
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def _userinfo(self):
         return urllib.parse.urlsplit(self._drv)._userinfo
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def _hostinfo(self):
         return urllib.parse.urlsplit(self._drv)._hostinfo
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def hostinfo(self):
         """The hostinfo of URL. "hostinfo" is hostname and port."""
         return netlocjoin(None, None, self.hostname, self.port)
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def username(self):
         """The username of url."""
         # NOTE: username and password can be encoded by percent-encoding.
@@ -244,7 +270,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return result
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def password(self):
         """The password of url."""
         result = super().password
@@ -253,7 +279,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return result
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def hostname(self):
         """The hostname of url."""
         result = super().hostname
@@ -265,56 +291,50 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return result
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def path(self):
         """The path of url, it's with trailing sep."""
         begin = 1 if self._drv or self._root else 0
-        # return self._root + self._flavour.sep.join(self._parts[begin:-1] + [urllib.parse.urlsplit(super().name).path])
         return self._root \
                + self._flavour.sep.join(urllib.parse.quote(i, safe='') for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def name(self):
         """The final path component, if any."""
         return urllib.parse.unquote(urllib.parse.urlsplit(super().name).path.rstrip(self._flavour.sep))
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def query(self):
         """The query of url."""
         return urllib.parse.urlsplit(super().name).query
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def fragment(self):
         """The fragment of url."""
         return urllib.parse.urlsplit(super().name).fragment
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def trailing_sep(self):
         """The trailing separator of url."""
         return re.search('(' + re.escape(self._flavour.sep) + '*)$', urllib.parse.urlsplit(super().name).path).group(0)
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def form_fields(self):
         """The query parsed by `urllib.parse.parse_qsl` of url."""
         return tuple(urllib.parse.parse_qsl(self.query, **self._parse_qsl_args))
 
     @property
-    @functools.lru_cache()
+    @cached_property
     def form(self):
         """The query parsed by `urllib.parse.parse_qs` of url."""
         return FrozenMultiDict({k: tuple(v)
                                 for k, v in urllib.parse.parse_qs(self.query, **self._parse_qsl_args).items()})
-
-    @property
-    def components(self):
-        """URL components, `(scheme, netloc, path, query, fragment)`."""
-        return self.scheme, self.netloc, self.path, self.query, self.fragment
 
     def with_name(self, name):
         """Return a new url with the file name changed."""

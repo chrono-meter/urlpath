@@ -199,3 +199,11 @@ class UrlTest(unittest.TestCase):
                          'http://example.com/name/%E6%97%A5%E6%9C%AC%E8%AA%9E/%E5%90%8D%E5%89%8D')
 
         self.assertEqual(str(URL('http://example.com/file').with_suffix('.///')), 'http://example.com/file.%2F%2F%2F')
+
+    def test_idempotent(self):
+        url = URL('http://\u65e5\u672c\u8a9e\u306e.\u30c9\u30e1\u30a4\u30f3.jp/'
+                  'path/to/\u30d5\u30a1\u30a4\u30eb.ext?\u30af\u30a8\u30ea')
+
+        self.assertEqual(url, URL(str(url)))
+        self.assertEqual(url, URL('http://xn--u9ju32nb2abz6g.xn--eckwd4c7c.jp/'
+                                  'path/to/\u30d5\u30a1\u30a4\u30eb.ext?\u30af\u30a8\u30ea'))
