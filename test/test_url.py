@@ -165,8 +165,8 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(str(url), '')
 
     def test_encoding(self):
-        self.assertEqual(URL('http://www.xn--alliancefranaise-npb.nu/').hostname, 'www.alliancefrançaise.nu')
-        self.assertEqual(str(URL('http://localhost/').with_hostinfo('www.alliancefrançaise.nu')),
+        self.assertEqual(URL('http://www.xn--alliancefranaise-npb.nu/').hostname, 'www.alliancefran\xe7aise.nu')
+        self.assertEqual(str(URL('http://localhost/').with_hostinfo('www.alliancefran\xe7aise.nu')),
                          'http://www.xn--alliancefranaise-npb.nu/')
 
         url = URL('http://%75%73%65%72:%70%61%73%73%77%64@httpbin.org/basic-auth/user/passwd')
@@ -183,19 +183,20 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(str(URL('http://example.com/日本語の/パス')),
                          'http://example.com/%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%81%AE/%E3%83%91%E3%82%B9')
 
-        original = 'http://example.com/めちゃくちゃな/パス/%2F%23%3F'
+        original = 'http://example.com/\u3081\u3061\u3083\u304f\u3061\u3083\u306a/\u30d1\u30b9/%2F%23%3F'
         url = URL(original)
-        self.assertEqual(str(url),
-                         'http://example.com/%E3%82%81%E3%81%A1%E3%82%83%E3%81%8F%E3%81%A1%E3%82%83%E3%81%AA/%E3%83%91%E3%82%B9/%2F%23%3F')
-        self.assertEqual(url.path,
-                         '/%E3%82%81%E3%81%A1%E3%82%83%E3%81%8F%E3%81%A1%E3%82%83%E3%81%AA/%E3%83%91%E3%82%B9/%2F%23%3F')
+        self.assertEqual(str(url), 'http://example.com/%E3%82%81%E3%81%A1%E3%82%83%E3%81%8F%E3%81%A1%E3%82%83%E3%81%AA/'
+                                   '%E3%83%91%E3%82%B9/%2F%23%3F')
+        self.assertEqual(url.path, '/%E3%82%81%E3%81%A1%E3%82%83%E3%81%8F%E3%81%A1%E3%82%83%E3%81%AA/'
+                                   '%E3%83%91%E3%82%B9/%2F%23%3F')
         self.assertEqual(url.name, '/#?')
-        self.assertTupleEqual(url.parts, ('http://example.com/', 'めちゃくちゃな', 'パス', '/#?'))
+        self.assertTupleEqual(url.parts, ('http://example.com/', '\u3081\u3061\u3083\u304f\u3061\u3083\u306a',
+                                          '\u30d1\u30b9', '/#?'))
 
-        self.assertEqual(str(URL('http://example.com/name').with_name('日本語/名前')),
+        self.assertEqual(str(URL('http://example.com/name').with_name('\u65e5\u672c\u8a9e/\u540d\u524d')),
                          'http://example.com/%E6%97%A5%E6%9C%AC%E8%AA%9E%2F%E5%90%8D%E5%89%8D')
 
-        self.assertEqual(str(URL('http://example.com/name') / '日本語/名前'),
+        self.assertEqual(str(URL('http://example.com/name') / '\u65e5\u672c\u8a9e/\u540d\u524d'),
                          'http://example.com/name/%E6%97%A5%E6%9C%AC%E8%AA%9E/%E5%90%8D%E5%89%8D')
 
         self.assertEqual(str(URL('http://example.com/file').with_suffix('.///')), 'http://example.com/file.%2F%2F%2F')
@@ -207,3 +208,7 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(url, URL(str(url)))
         self.assertEqual(url, URL('http://xn--u9ju32nb2abz6g.xn--eckwd4c7c.jp/'
                                   'path/to/\u30d5\u30a1\u30a4\u30eb.ext?\u30af\u30a8\u30ea'))
+
+    def test_embed(self):
+        url = URL('http://example.com/').with_fragment(URL('/param1/param2').with_query(f1=1, f2=2))
+        self.assertEqual(str(url), 'http://example.com/#/param1/param2?f1=1&f2=2')
