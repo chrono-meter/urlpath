@@ -139,8 +139,8 @@ def netlocjoin(username, password, hostname, port):
 
 
 class _URLFlavour(_PosixFlavour):
-    has_drv = True
-    is_supported = True
+    has_drv = True  # drive is scheme + netloc
+    is_supported = True  # supported in all platform
 
     def splitroot(self, part, sep=_PosixFlavour.sep):
         assert sep == self.sep
@@ -148,22 +148,15 @@ class _URLFlavour(_PosixFlavour):
 
         scheme, netloc, path, query, fragment = urllib.parse.urlsplit(part)
 
-        drive = urllib.parse.urlunsplit((scheme, netloc, '', '', ''))
-
         # trick to escape '/' in query and fragment and trailing
-        if path != '/':
+        if not re.match(re.escape(sep) + '+$', path):
             path = re.sub('%s+$' % (re.escape(sep), ), lambda m: '\\x00' * len(m.group(0)), path)
-        if query:
-            path += '?' + query.replace('/', '\\x00')
-        if fragment:
-            path += '#' + fragment.replace('/', '\\x00')
+        path = urllib.parse.urlunsplit(('', '', path, query.replace('/', '\\x00'), fragment.replace('/', '\\x00')))
 
+        drive = urllib.parse.urlunsplit((scheme, netloc, '', '', ''))
         root, path = re.match('^(%s*)(.*)$' % (re.escape(sep), ), path).groups()
 
         return drive, root, path
-
-    def make_uri(self, url):
-        return str(url)
 
 
 class URL(urllib.parse._NetlocResultMixinStr, PurePath):
