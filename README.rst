@@ -1,5 +1,15 @@
 urlpath provides URL manipulator class that extends
 `pathlib.PurePath <https://docs.python.org/3/library/pathlib.html#pure-paths>`_.
+================================================================================
+
+.. image:: https://img.shields.io/travis/chrono-meter/urlpath.svg
+    :target: https://travis-ci.org/chrono-meter/urlpath
+
+.. image:: https://img.shields.io/pypi/v/urlpath.svg
+    :target: https://pypi.python.org/pypi/urlpath
+
+.. image:: https://img.shields.io/pypi/l/urlpath.svg
+    :target: http://python.org/psf/license
 
 Dependencies
 ------------
