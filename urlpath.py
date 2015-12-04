@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Object-oriented URL from `urllib.parse` and `pathlib`
 """
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __author__ = __author_email__ = 'chrono-meter@gmx.net'
 __license__ = 'PSF'
 __url__ = 'https://github.com/chrono-meter/urlpath'
@@ -29,7 +29,7 @@ try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
-import requests
+import requests  # TODO: move to setup.extras_require
 try:
     import webob
 except ImportError:
