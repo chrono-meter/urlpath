@@ -4,7 +4,7 @@ urlpath provides URL manipulator class that extends
 Dependencies
 ------------
 
-* Python 3
+* Python 3.2, 3.3, 3.4, 3.5
 * `pathlib <https://pypi.python.org/pypi/pathlib>`_ (Standard library in Python 3.4)
 * `unittest.mock <https://docs.python.org/3/library/unittest.mock.html>`_ (Standard library in Python 3.3, or install
   `mock <https://pypi.python.org/pypi/mock>`_)
