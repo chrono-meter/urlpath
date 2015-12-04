@@ -29,6 +29,7 @@ try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
+import requests
 try:
     import webob
 except ImportError:
@@ -200,6 +201,8 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     def __bytes__(self):
         return str(self).encode('utf-8')
 
+    # TODO: sort self.query in __hash__
+
     @cached_property
     def as_uri(self):
         """Return URI."""
@@ -218,7 +221,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @property
     @cached_property
     def components(self):
-        """URL components, `(scheme, netloc, path, query, fragment)`."""
+        """Url components, `(scheme, netloc, path, query, fragment)`."""
         return self.scheme, self.netloc, self.path, self.query, self.fragment
 
     _cparts = components
@@ -248,7 +251,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @property
     @cached_property
     def hostinfo(self):
-        """The hostinfo of URL. "hostinfo" is hostname and port."""
+        """The hostinfo of url. "hostinfo" is hostname and port."""
         return netlocjoin(None, None, self.hostname, self.port)
 
     @property
@@ -458,6 +461,90 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @property
     def jailed(self):
         return JailedURL(self, root=self)
+
+    def get(self, params=None, **kwargs):
+        """Sends a GET request.
+
+        :param params: (optional) Dictionary or bytes to be sent in the query string for the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        response = requests.get(url, params, **kwargs)
+        return response
+
+    def options(self, **kwargs):
+        """Sends a OPTIONS request.
+
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        return requests.options(url, **kwargs)
+
+    def head(self, **kwargs):
+        """Sends a HEAD request.
+
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        return requests.options(url, **kwargs)
+
+    def post(self, data=None, json=None, **kwargs):
+        """Sends a POST request.
+
+        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+        :param json: (optional) json data to send in the body of the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        return requests.options(url, data=data, json=json, **kwargs)
+
+    def put(self, data=None, **kwargs):
+        """Sends a PUT request.
+
+        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        return requests.put(url, data=data, **kwargs)
+
+    def patch(self, data=None, **kwargs):
+        """Sends a PATCH request.
+
+        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        return requests.patch(url,  data=data, **kwargs)
+
+
+    def delete(self, **kwargs):
+        """Sends a DELETE request.
+
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :return: :class:`Response <Response>` object
+        :rtype: requests.Response
+        """
+
+        url = str(self)
+        return requests.delete(url, **kwargs)
 
 
 class JailedURL(URL):

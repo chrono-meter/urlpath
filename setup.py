@@ -10,7 +10,7 @@ def readme():
         return f.read()
 
 
-install_requires = []
+install_requires = ['requests']
 if sys.version[:3] < '3.4':
     install_requires.append('pathlib')
 if sys.version[:3] < '3.3':

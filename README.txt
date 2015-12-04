@@ -8,6 +8,7 @@ Dependencies
 * `pathlib <https://pypi.python.org/pypi/pathlib>`_ (Standard library in Python 3.4)
 * `unittest.mock <https://docs.python.org/3/library/unittest.mock.html>`_ (Standard library in Python 3.3, or install
   `mock <https://pypi.python.org/pypi/mock>`_)
+* `Requests <http://docs.python-requests.org/>`_
 * `WebOb <http://webob.org/>`_ (Optional)
 
 Install
@@ -135,6 +136,28 @@ Replace query::
     URL('https://username:password@secure.example.com:1234/path/to/file.ext?query#fragment')
     >>> url.with_query(None)
     URL('https://username:password@secure.example.com:1234/path/to/file.ext#fragment')
+
+Do HTTP requests::
+
+    >>> url = URL('https://httpbin.org/get')
+    >>> url.get()
+    <Response [200]>
+
+    >>> url = URL('https://httpbin.org/post')
+    >>> url.post(data={'key': 'value'})
+    <Response [200]>
+
+    >>> url = URL('https://httpbin.org/delete')
+    >>> url.delete()
+    <Response [200]>
+
+    >>> url = URL('https://httpbin.org/patch')
+    >>> url.patch(data={'key': 'value'})
+    <Response [200]>
+
+    >>> url = URL('https://httpbin.org/put')
+    >>> url.put(data={'key': 'value'})
+    <Response [200]>
 
 Jail::
 
