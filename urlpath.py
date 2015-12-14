@@ -508,7 +508,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         """
 
         url = str(self)
-        return requests.options(url, data=data, json=json, **kwargs)
+        return requests.post(url, data=data, json=json, **kwargs)
 
     def put(self, data=None, **kwargs):
         """Sends a PUT request.
