@@ -196,7 +196,7 @@ Trailing separator will be remained::
     >>> url.parts[-1]
     'sep'
 
-    >>> url = URL('http://www.example.com/path/with/trailing/sep')
+    >>> url = URL('http://www.example.com/path/without/trailing/sep')
     >>> str(url).endswith('/')
     False
     >>> url.trailing_sep
@@ -204,7 +204,7 @@ Trailing separator will be remained::
     >>> url.name
     'sep'
     >>> url.path
-    '/path/with/trailing/sep'
+    '/path/without/trailing/sep'
     >>> url.parts[-1]
     'sep'
 
