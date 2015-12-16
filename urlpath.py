@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Object-oriented URL from `urllib.parse` and `pathlib`
 """
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __author__ = __author_email__ = 'chrono-meter@gmx.net'
 __license__ = 'PSF'
 __url__ = 'https://github.com/chrono-meter/urlpath'
