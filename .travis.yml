@@ -13,3 +13,11 @@ install:
 script:
   - nosetests
   - python -m doctest README.rst
+deploy:
+  provider: pypi
+  user: chronometer
+  password:
+    secure: lk/eVszm/1NDIkTgg3VzGkfISjvOpWHMbzqu8Yg1lfO5DdMmNxRq5gqMKMXF7mohr21NsiPXv+HGcEcfbmxGToD1cXeiD8NTo61ZQb3RcXbhGdYyZNAP5LOxY2bRgrd3gL+A20Bj53Cz3kG2L2+fKC6r+wBTbib3Njv/24J2+1E=
+  on:
+    tags: true
+    branch: master
