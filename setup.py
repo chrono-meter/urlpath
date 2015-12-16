@@ -12,6 +12,8 @@ def readme():
 
 
 def get_meta(filename):
+    """Get top level module metadata without execution.
+    """
     result = {
         '__file__': filename,
         '__name__': os.path.splitext(os.path.basename(filename))[0],
@@ -55,4 +57,7 @@ setup(
     classifiers=meta['__classifiers__'],
     license=meta['__license__'],
     install_requires=install_requires,
+    extras_require={
+        'test': ['WebOb']
+    },
 )

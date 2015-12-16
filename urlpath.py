@@ -14,7 +14,10 @@ __classifiers__ = [
     'Intended Audience :: Developers',
     'License :: OSI Approved :: Python Software Foundation License',
     'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3.2',
+    'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
@@ -29,7 +32,7 @@ try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
-import requests  # TODO: move to setup.extras_require
+import requests
 try:
     import webob
 except ImportError:

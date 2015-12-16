@@ -212,3 +212,7 @@ class UrlTest(unittest.TestCase):
     def test_embed(self):
         url = URL('http://example.com/').with_fragment(URL('/param1/param2').with_query(f1=1, f2=2))
         self.assertEqual(str(url), 'http://example.com/#/param1/param2?f1=1&f2=2')
+
+
+if __name__ == '__main__':
+    unittest.main()

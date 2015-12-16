@@ -8,7 +8,6 @@ python:
   - "nightly" # currently points to 3.6-dev
 # command to install dependencies
 install:
-  - python setup.py -q install
-  - pip install -q WebOb
+  - pip install -e .[test]
 # command to run tests
 script: nosetests

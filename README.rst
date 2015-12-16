@@ -1,6 +1,5 @@
-urlpath provides URL manipulator class that extends
-`pathlib.PurePath <https://docs.python.org/3/library/pathlib.html#pure-paths>`_.
-================================================================================
+urlpath provides URL manipulator class that extends `pathlib.PurePath <https://docs.python.org/3/library/pathlib.html#pure-paths>`_.
+====================================================================================================================================
 
 .. image:: https://img.shields.io/travis/chrono-meter/urlpath.svg
     :target: https://travis-ci.org/chrono-meter/urlpath
@@ -208,3 +207,4 @@ Trailing separator will be remained::
     '/path/with/trailing/sep'
     >>> url.parts[-1]
     'sep'
+
