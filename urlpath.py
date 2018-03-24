@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Object-oriented URL from `urllib.parse` and `pathlib`
 """
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 __author__ = __author_email__ = 'chrono-meter@gmx.net'
 __license__ = 'PSF'
 __url__ = 'https://github.com/chrono-meter/urlpath'
@@ -14,10 +14,10 @@ __classifiers__ = [
     'Intended Audience :: Developers',
     'License :: OSI Approved :: Python Software Foundation License',
     'Operating System :: OS Independent',
-    'Programming Language :: Python :: 3.2',
     'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
