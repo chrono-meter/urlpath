@@ -293,9 +293,14 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
     @cached_property
     def path(self):
         """The path of url, it's with trailing sep."""
+
+        # https://tools.ietf.org/html/rfc3986#appendix-A
+        safe_pchars = '-._~!$&\'()*+,;=:@'
+
         begin = 1 if self._drv or self._root else 0
+
         return self._root \
-               + self._flavour.sep.join(urllib.parse.quote(i, safe='') for i in self._parts[begin:-1] + [self.name]) \
+               + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
 
     @property

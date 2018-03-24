@@ -213,6 +213,10 @@ class UrlTest(unittest.TestCase):
         url = URL('http://example.com/').with_fragment(URL('/param1/param2').with_query(f1=1, f2=2))
         self.assertEqual(str(url), 'http://example.com/#/param1/param2?f1=1&f2=2')
 
+    def test_pchar(self):
+        url = URL('s3://mybucket') / 'some_folder/123_2017-10-30T18:43:11.csv.gz'
+        self.assertEqual(str(url), 's3://mybucket/some_folder/123_2017-10-30T18:43:11.csv.gz')
+
 
 if __name__ == '__main__':
     unittest.main()
