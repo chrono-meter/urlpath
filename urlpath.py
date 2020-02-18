@@ -440,6 +440,27 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         assert not (query and kwargs)
         return self.with_components(query=query or kwargs)
 
+    def add_query(self, query=None, **kwargs):
+        """Return a new url with the query ammended."""
+        assert not (query and kwargs)
+        query = query or kwargs
+        if not query:
+            return self.with_components()
+        current = self.query
+        if not current:
+            return self.with_components(query=query)
+        appendix = ''     # suppress lint warnings
+        if isinstance(query, collections.Mapping):
+            appendix = urllib.parse.urlencode(sorted(query.items()), **self._urlencode_args)
+        elif isinstance(query, collections.Sequence):
+            appendix = urllib.parse.urlencode(query, **self._urlencode_args)
+        elif query is not None:
+            appendix = str(query)
+        if appendix:
+            new = '%s&%s' % (current, appendix)
+            return self.with_components(query=new)
+        return self.with_components()
+
     def with_fragment(self, fragment):
         """Return a new url with the fragment changed."""
         return self.with_components(fragment=fragment)
