@@ -471,7 +471,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return JailedURL(self, root=self)
 
     def get(self, params=None, **kwargs):
-        """Sends a GET request.
+        r"""Sends a GET request.
 
         :param params: (optional) Dictionary or bytes to be sent in the query string for the :class:`Request`.
         :param \*\*kwargs: Optional arguments that ``request`` takes.
@@ -484,7 +484,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return response
 
     def options(self, **kwargs):
-        """Sends a OPTIONS request.
+        r"""Sends a OPTIONS request.
 
         :param \*\*kwargs: Optional arguments that ``request`` takes.
         :return: :class:`Response <Response>` object
@@ -495,7 +495,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return requests.options(url, **kwargs)
 
     def head(self, **kwargs):
-        """Sends a HEAD request.
+        r"""Sends a HEAD request.
 
         :param \*\*kwargs: Optional arguments that ``request`` takes.
         :return: :class:`Response <Response>` object
@@ -506,7 +506,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return requests.options(url, **kwargs)
 
     def post(self, data=None, json=None, **kwargs):
-        """Sends a POST request.
+        r"""Sends a POST request.
 
         :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
         :param json: (optional) json data to send in the body of the :class:`Request`.
@@ -531,7 +531,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return requests.put(url, data=data, **kwargs)
 
     def patch(self, data=None, **kwargs):
-        """Sends a PATCH request.
+        r"""Sends a PATCH request.
 
         :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
         :param \*\*kwargs: Optional arguments that ``request`` takes.
@@ -544,7 +544,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
 
     def delete(self, **kwargs):
-        """Sends a DELETE request.
+        r"""Sends a DELETE request.
 
         :param \*\*kwargs: Optional arguments that ``request`` takes.
         :return: :class:`Response <Response>` object
