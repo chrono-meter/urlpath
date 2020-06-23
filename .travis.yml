@@ -4,6 +4,12 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
+  - "3.8"
+matrix:
+  include:
+    - python: 3.3
+      dist: trusty
 # command to install dependencies
 install:
   - pip install -e .[test]
@@ -19,4 +25,4 @@ deploy:
   on:
     tags: true
     branch: master
-    python: "3.6"
+    python: "3.8"

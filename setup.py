@@ -36,7 +36,7 @@ def get_meta(filename):
     return result
 
 
-install_requires = ['requests']
+install_requires = ['requests', 'jmespath']
 if sys.version[:3] < '3.4':
     install_requires.append('pathlib')
 if sys.version[:3] < '3.3':
