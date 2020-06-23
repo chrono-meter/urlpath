@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Object-oriented URL from `urllib.parse` and `pathlib`
 """
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __author__ = __author_email__ = 'chrono-meter@gmx.net'
 __license__ = 'PSF'
 __url__ = 'https://github.com/chrono-meter/urlpath'
@@ -21,23 +21,25 @@ __classifiers__ = [
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
-__all__ = ('URL', )
+__all__ = ('URL',)
 
 import collections.abc
 import functools
-from pathlib import _PosixFlavour, PurePath
-import urllib.parse
+import jmespath as _jm
 import re
+import urllib.parse
+from pathlib import _PosixFlavour, PurePath
+
 try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
 import requests
+
 try:
     import webob
 except ImportError:
     webob = None
-
 
 missing = object()
 
@@ -99,6 +101,7 @@ class FrozenMultiDict(MultiDictMixin, FrozenDict):
 def cached_property(getter):
     """Limited version of `functools.lru_cache`. But `__hash__` is not required.
     """
+
     @functools.wraps(getter)
     def helper(self):
         key = '_cached_property_' + getter.__name__
@@ -154,11 +157,11 @@ class _URLFlavour(_PosixFlavour):
 
         # trick to escape '/' in query and fragment and trailing
         if not re.match(re.escape(sep) + '+$', path):
-            path = re.sub('%s+$' % (re.escape(sep), ), lambda m: '\\x00' * len(m.group(0)), path)
+            path = re.sub('%s+$' % (re.escape(sep),), lambda m: '\\x00' * len(m.group(0)), path)
         path = urllib.parse.urlunsplit(('', '', path, query.replace('/', '\\x00'), fragment.replace('/', '\\x00')))
 
         drive = urllib.parse.urlunsplit((scheme, netloc, '', '', ''))
-        root, path = re.match('^(%s*)(.*)$' % (re.escape(sep), ), path).groups()
+        root, path = re.match('^(%s*)(.*)$' % (re.escape(sep),), path).groups()
 
         return drive, root, path
 
@@ -440,6 +443,54 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         assert not (query and kwargs)
         return self.with_components(query=query or kwargs)
 
+    def add_query(self, query=None, **kwargs):
+        """Return a new url with the query ammended."""
+        assert not (query and kwargs)
+        query = query or kwargs
+        if not query:
+            return self.with_components()
+        current = self.query
+        if not current:
+            return self.with_components(query=query)
+        appendix = ''  # suppress lint warnings
+        if isinstance(query, collections.Mapping):
+            appendix = urllib.parse.urlencode(sorted(query.items()), **self._urlencode_args)
+        elif isinstance(query, collections.Sequence):
+            appendix = urllib.parse.urlencode(query, **self._urlencode_args)
+        elif query is not None:
+            appendix = str(query)
+        if appendix:
+            new = '%s&%s' % (current, appendix)
+            return self.with_components(query=new)
+        return self.with_components()
+
+    def gettext(self, name='', query='', pattern='', overwrite=False):
+        "Runs a url with a specific query, amending query if necessary, and returns the resulting text"
+        q = query if overwrite else self.add_query(query).query if query else self.query
+        url = self.joinpath(name) if name else self
+        res = url.with_query(q).get()
+
+        if res:
+            if pattern:
+                if isinstance(pattern, str):  # patterns should be a compiled transformer like a regex object
+                    pattern = re.compile(pattern)
+                return list(filter(pattern.match, res.text.split('\n')))
+            return res.text
+        return res
+
+    def getjson(self, name='', query='', keys='', overwrite=False):
+        "Runs a url with a specific query, amending query if necessary, and returns the result after applying a transformer"
+        q = query if overwrite else self.add_query(query).query if query else self.query
+        url = self.joinpath(name) if name else self
+        res = url.with_query(q).get()
+
+        if res and keys:
+            if isinstance(keys, str):  # keys should be a compiled transformer like a jamespath object
+                keys = _jm.compile(keys)
+            return keys.search(res.json())
+
+        return res.json()
+
     def with_fragment(self, fragment):
         """Return a new url with the fragment changed."""
         return self.with_components(fragment=fragment)
@@ -540,8 +591,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         """
 
         url = str(self)
-        return requests.patch(url,  data=data, **kwargs)
-
+        return requests.patch(url, data=data, **kwargs)
 
     def delete(self, **kwargs):
         r"""Sends a DELETE request.
@@ -568,12 +618,12 @@ class JailedURL(URL):
         else:
             root = URL(*args)
 
-        assert root.scheme and root.netloc and not root.query and not root.fragment, 'malformed root: %s' % (root, )
+        assert root.scheme and root.netloc and not root.query and not root.fragment, 'malformed root: %s' % (root,)
 
         if not root.path:
             root = root / '/'
 
-        return type(cls.__name__, (cls, ), {'_chroot': root})._from_parts(args)
+        return type(cls.__name__, (cls,), {'_chroot': root})._from_parts(args)
 
     def _make_child(self, args):
         drv, root, parts = self._parse_args(args)
