@@ -23,7 +23,7 @@ __classifiers__ = [
 ]
 __all__ = ('URL', )
 
-import collections
+import collections.abc
 import functools
 from pathlib import _PosixFlavour, PurePath
 import urllib.parse
@@ -43,7 +43,7 @@ missing = object()
 
 
 # http://stackoverflow.com/a/2704866/3622941
-class FrozenDict(collections.Mapping):
+class FrozenDict(collections.abc.Mapping):
     """Immutable dict object."""
     __slots__ = ('_d', '_hash')
 
@@ -401,13 +401,13 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
         if query is missing:
             query = self.query
-        elif isinstance(query, collections.Mapping):
+        elif isinstance(query, collections.abc.Mapping):
             query = urllib.parse.urlencode(sorted(query.items()), **self._urlencode_args)
         elif isinstance(query, str):
             # TODO: Is escaping '#' required?
             # query = query.replace('#', '%23')
             pass
-        elif isinstance(query, collections.Sequence):
+        elif isinstance(query, collections.abc.Sequence):
             query = urllib.parse.urlencode(query, **self._urlencode_args)
         elif query is not None:
             query = str(query)
@@ -519,7 +519,7 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         return requests.post(url, data=data, json=json, **kwargs)
 
     def put(self, data=None, **kwargs):
-        """Sends a PUT request.
+        r"""Sends a PUT request.
 
         :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
         :param \*\*kwargs: Optional arguments that ``request`` takes.
