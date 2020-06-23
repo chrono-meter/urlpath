@@ -26,7 +26,6 @@ __all__ = ('URL',)
 
 import collections.abc
 import functools
-import jmespath as _jm
 import re
 import urllib.parse
 from pathlib import _PosixFlavour, PurePath
@@ -36,6 +35,11 @@ try:
 except ImportError:
     from mock import patch
 import requests
+
+try:
+    import jmespath
+except ImportError:
+    jmespath = None
 
 try:
     import webob
@@ -304,7 +308,8 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
         begin = 1 if self._drv or self._root else 0
 
         return self._root \
-               + self._flavour.sep.join(urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
+               + self._flavour.sep.join(
+            urllib.parse.quote(i, safe=safe_pchars) for i in self._parts[begin:-1] + [self.name]) \
                + self.trailing_sep
 
     @property
@@ -465,33 +470,6 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
             return self.with_components(query=new)
         return self.with_components()
 
-    def gettext(self, name='', query='', pattern='', overwrite=False):
-        "Runs a url with a specific query, amending query if necessary, and returns the resulting text"
-        q = query if overwrite else self.add_query(query).query if query else self.query
-        url = self.joinpath(name) if name else self
-        res = url.with_query(q).get()
-
-        if res:
-            if pattern:
-                if isinstance(pattern, str):  # patterns should be a compiled transformer like a regex object
-                    pattern = re.compile(pattern)
-                return list(filter(pattern.match, res.text.split('\n')))
-            return res.text
-        return res
-
-    def getjson(self, name='', query='', keys='', overwrite=False):
-        "Runs a url with a specific query, amending query if necessary, and returns the result after applying a transformer"
-        q = query if overwrite else self.add_query(query).query if query else self.query
-        url = self.joinpath(name) if name else self
-        res = url.with_query(q).get()
-
-        if res and keys:
-            if isinstance(keys, str):  # keys should be a compiled transformer like a jamespath object
-                keys = _jm.compile(keys)
-            return keys.search(res.json())
-
-        return res.json()
-
     def with_fragment(self, fragment):
         """Return a new url with the fragment changed."""
         return self.with_components(fragment=fragment)
@@ -604,6 +582,41 @@ class URL(urllib.parse._NetlocResultMixinStr, PurePath):
 
         url = str(self)
         return requests.delete(url, **kwargs)
+
+    def get_text(self, name='', query='', pattern='', overwrite=False):
+        """Runs a url with a specific query, amending query if necessary, and returns the resulting text"""
+        q = query if overwrite else self.add_query(query).query if query else self.query
+        url = self.joinpath(name) if name else self
+        res = url.with_query(q).get()
+
+        if res:
+            if pattern:
+                if isinstance(pattern, str):  # patterns should be a compiled transformer like a regex object
+                    pattern = re.compile(pattern)
+
+                return list(filter(pattern.match, res.text.split('\n')))
+
+            return res.text
+
+        return res
+
+    def get_json(self, name='', query='', keys='', overwrite=False):
+        """Runs a url with a specific query, amending query if necessary, and returns the result after applying a
+        transformer"""
+        q = query if overwrite else self.add_query(query).query if query else self.query
+        url = self.joinpath(name) if name else self
+        res = url.with_query(q).get()
+
+        if res and keys:
+            if not jmespath:
+                raise ImportError('jmespath is not installed')
+
+            if isinstance(keys, str):  # keys should be a compiled transformer like a jamespath object
+                keys = jmespath.compile(keys)
+
+            return keys.search(res.json())
+
+        return res.json()
 
 
 class JailedURL(URL):

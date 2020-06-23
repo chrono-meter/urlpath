@@ -36,7 +36,7 @@ def get_meta(filename):
     return result
 
 
-install_requires = ['requests', 'jmespath']
+install_requires = ['requests']
 if sys.version[:3] < '3.4':
     install_requires.append('pathlib')
 if sys.version[:3] < '3.3':
@@ -58,6 +58,7 @@ setup(
     license=meta['__license__'],
     install_requires=install_requires,
     extras_require={
-        'test': ['WebOb']
+        'test': ['WebOb', 'jmespath'],
+        'json': ['jmespath'],
     },
 )

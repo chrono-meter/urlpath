@@ -75,7 +75,7 @@ class UrlTest(unittest.TestCase):
         self.assertEqual(url.query, query)
         self.assertSetEqual(set(url.form), {'field1', 'field2'})
         self.assertTupleEqual(url.form.get('field1'), ('value1', 'value2'))
-        self.assertTupleEqual(url.form.get('field2'), ('hello, world&python', ))
+        self.assertTupleEqual(url.form.get('field2'), ('hello, world&python',))
         self.assertIn('field1', url.form)
         self.assertIn('field2', url.form)
         self.assertNotIn('field3', url.form)
@@ -87,7 +87,7 @@ class UrlTest(unittest.TestCase):
         self.assertNotIn('field2', url.form)
         self.assertIn('field3', url.form)
         self.assertIn('field4', url.form)
-        self.assertTupleEqual(url.form.get('field3'), ('value3', ))
+        self.assertTupleEqual(url.form.get('field3'), ('value3',))
         self.assertTupleEqual(url.form.get('field4'), ('1', '2', '3'))
 
     def test_add_query(self):
@@ -95,9 +95,9 @@ class UrlTest(unittest.TestCase):
         url = URL('http://www.example.com/form?' + query)
 
         ## if initial query is null, it should include the added query
-        ext_url = url.with_query('').add_query({'field3': 'value3', 'field4': [1, 2, 3]}) 
+        ext_url = url.with_query('').add_query({'field3': 'value3', 'field4': [1, 2, 3]})
         self.assertSetEqual(set(ext_url.form), {'field3', 'field4'})
-        self.assertTupleEqual(ext_url.form.get('field3'), ('value3', ))
+        self.assertTupleEqual(ext_url.form.get('field3'), ('value3',))
         self.assertTupleEqual(ext_url.form.get('field4'), ('1', '2', '3'))
         self.assertNotIn('field1', ext_url.form)
         self.assertNotIn('field2', ext_url.form)
@@ -107,15 +107,15 @@ class UrlTest(unittest.TestCase):
         ## if initial query exists, it should include the both fields
         ext_query = {'field3': 'value3', 'field4': [1, 2, 3]}
         ext_url = url.add_query({'field3': 'value3', 'field4': [1, 2, 3]})
-        self.assertEqual(ext_url.query, '%s&%s'%(query, 'field3=value3&field4=1&field4=2&field4=3'))
+        self.assertEqual(ext_url.query, '%s&%s' % (query, 'field3=value3&field4=1&field4=2&field4=3'))
         self.assertSetEqual(set(ext_url.form), {'field1', 'field2', 'field3', 'field4'})
         self.assertIn('field1', ext_url.form)
         self.assertIn('field2', ext_url.form)
         self.assertIn('field3', ext_url.form)
         self.assertIn('field4', ext_url.form)
         self.assertTupleEqual(ext_url.form.get('field1'), ('value1', 'value2'))
-        self.assertTupleEqual(ext_url.form.get('field2'), ('hello, world&python', ))
-        self.assertTupleEqual(ext_url.form.get('field3'), ('value3', ))
+        self.assertTupleEqual(ext_url.form.get('field2'), ('hello, world&python',))
+        self.assertTupleEqual(ext_url.form.get('field3'), ('value3',))
         self.assertTupleEqual(ext_url.form.get('field4'), ('1', '2', '3'))
 
         ## if added query is null, it should include original query
