@@ -18,7 +18,7 @@ Dependencies
 * `unittest.mock <https://docs.python.org/3/library/unittest.mock.html>`_ (Standard library in Python 3.3, or install
   `mock <https://pypi.python.org/pypi/mock>`_)
 * `Requests <http://docs.python-requests.org/>`_
-* `JMESPath <https://pypi.org/project/jmespath/>`_
+* `JMESPath <https://pypi.org/project/jmespath/>`_ (Optional)
 * `WebOb <http://webob.org/>`_ (Optional)
 
 Install
